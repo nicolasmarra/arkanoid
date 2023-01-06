@@ -129,6 +129,8 @@ bool checkCollisionBrick() {
     // Vérifier si la balle entre en collision avec la brique actuelle
 
 	  	if(bricks[i].isDestroyed) continue;
+
+
 	  	if (ball.x + ball.width > bricks[i].x &&
         ball.x < bricks[i].x + bricks[i].width &&
         ball.y + ball.width > bricks[i].y &&
@@ -144,45 +146,85 @@ bool checkCollisionBrick() {
   return false;
 }
 
-bool checkCollisionRect() {
-	// Vérifier si la balle entre en collision avec la plateforme
-	  if (ball.x + ball.width > rect.x &&
-	      ball.x < rect.x + rect.width &&
-	      ball.y + ball.width > rect.y &&
-	      ball.y < rect.y + rect.height) {
-	    // Il y a collision, retourner vrai
-	    return true;
-	  }
 
-	  // Aucune collision n'a été détectée, retourner false
-	  return false;
+
+bool checkCollisionRect() {
+	 // Calcul des coordonnées des coins de la balle
+	  float bx1 = ball.x - ball.width / 2;
+	  float bx2 = ball.x + ball.width / 2;
+	  float by1 = ball.y - ball.height / 2;
+	  float by2 = ball.y + ball.height / 2;
+
+	  // Calcul des coordonnées des coins du rectangle
+	  float rx1 = rect.x - rect.width / 2;
+	  float rx2 = rect.x + rect.width / 2;
+	  float ry1 = rect.y - rect.height / 2;
+	  float ry2 = rect.y + rect.height / 2;
+
+	  // Vérification de la collision
+	  if (bx1 > rx2 || bx2 < rx1 || by1 > ry2 || by2 < ry1) {
+	    return false; // Pas de collision
+	  }
+	  return true; // Collision détectée
+
+}
+
+void endGame(){
+	ball.x = 380;
+	ball.y = 420;
+	ball.vX = 0;
+	ball.vY = 0;
+
+	rect.x = 380;
+	rect.y = 450;
+
+	float posX=100, posY=80;
+	// Coordonnées du centre de la brique
+	for(int i=0; i< nBricks; i++){
+		bricks[i].x = posX;
+		bricks[i].y = posY;
+		bricks[i].isDestroyed = false;
+		posX+=50;
+		if(posX > 650){
+			posX = 100;
+			posY+= 28;
+		}
 	}
+}
 
 void moveBall(){
 
 	ball.x += ball.vX;
 
-	if(checkCollisionBrick())
+
+	if(checkCollisionBrick()){
 		ball.vX = -ball.vX;
+	}
 
 	ball.y -= ball.vY;
-	if(checkCollisionBrick())
+	if(checkCollisionBrick()){
+
 		ball.vY = -ball.vY;
 
+	}
 	// Gérer les rebonds de la balle sur les bords de l'écran
+	if(ball.x-ball.width < -50 || ball.x+ball.width > 750)
+		ball.vX = -ball.vX;
 
-
-	/*
-	if(ball.x > 0 || ball.x < -1)
-		ball.vX -= ball.vX;
-	if(ball.y > 0 || ball.y < -1)
-			ball.vY -= ball.vY;
-	*/
+	if(ball.y < 0)
+		ball.vY = -ball.vY;
 
 	if(checkCollisionRect())
 		ball.vY = -ball.vY;
 
+	if(ball.y + ball.width > 810){
 
+	//GAMEOVER
+
+	endGame();
+
+	}
+    glutSwapBuffers();
 	glutPostRedisplay();
 }
 
@@ -191,9 +233,8 @@ void mouseEvent(int button, int state, int x, int y)
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
     	if(ball.vX <= 0 && ball.vY <= 0){
-
-    		ball.vX = 0.2;
-    		ball.vX = 0.2;
+    		ball.vX = 0.01;
+    		ball.vY = 0.03;
 
     	}
         glutIdleFunc(moveBall);
