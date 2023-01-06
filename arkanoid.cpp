@@ -21,7 +21,7 @@ struct Rect{
 	// Coordonnées du centre du rectangle
 	float x = 380, y = 450;
 	// Dimensions du rectangle
-	float width = 150, height = 5;
+	float width = 100, height = 5;
 
 };
 
@@ -98,6 +98,50 @@ void drawBrick(){
 
 }
 
+// Fonction de gestion des événements du clavier
+/*
+void keyboard(int key, int x, int y){
+    switch(key){
+        case GLUT_KEY_LEFT:
+            barX -= 10;
+            if(barX < 0){
+                barX = 0;
+            }
+            glutPostRedisplay();
+            break;
+        case GLUT_KEY_RIGHT:
+            barX += 10;
+            if(barX+barWidth > 480){
+                barX = 480-barWidth;
+            }
+            glutPostRedisplay();
+            break;
+        default:
+            break;
+    }
+}
+*/
+
+void myKeyboard(int key, int x, int y){
+	// Traitement à effectuer lorsque la touche est enfoncée
+	switch(key)
+	{
+			case GLUT_KEY_RIGHT:
+		        rect.x += 15;
+		        if(rect.x+rect.width > 810) rect.x  = 810 - rect.width;
+		        break;
+			case GLUT_KEY_LEFT:
+				rect.x -= 15;
+	            if(rect.x-rect.width < -50) rect.x = -50 + rect.width;
+	            break;
+	        default:
+	        	break;
+	}
+
+	glutPostRedisplay(); // On demande un rafraîchissement de l'affichage
+
+}
+
 void display(void)
 {
     glClear (GL_COLOR_BUFFER_BIT);
@@ -122,20 +166,26 @@ void init()
 int main(int argc, char **argv)
 {
 
-glutInit(&argc, argv);
-glutInitDisplayMode ( GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+	// Initialisation de FreeGLUT
+	glutInit(&argc, argv);
 
-glutInitWindowPosition(200,50);
-glutInitWindowSize(800,600);
-glutCreateWindow ("ARKANOID");
+	glutInitDisplayMode ( GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+	glutInitWindowPosition(200,50);
+	glutInitWindowSize(800,600);
+	glutCreateWindow ("ARKANOID");
+
+	// Définition de la fonction de gestion des événements du clavier
+	//glutKeyboardFunc(myKeyboard);
+	glutSpecialFunc(myKeyboard);
+
+	glutDisplayFunc(display);
+
+	init();
 
 
-glutDisplayFunc(display);
 
-init();
+	glutMainLoop(); // Lancement de la boucle d'événements
 
-glutMainLoop();
-
-return 0;
+	return 0;
 
 }
