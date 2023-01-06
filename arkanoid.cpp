@@ -15,6 +15,9 @@ struct Ball{
 	// Dimensions de la balle
 	float width = 10, height = 8;
 
+	//Vitesse de la balle
+	float vX=0.2, vY = 0.2;
+
 };
 
 struct Rect{
@@ -122,7 +125,7 @@ void keyboard(int key, int x, int y){
 }
 */
 
-void myKeyboard(int key, int x, int y){
+void keyPress(int key, int x, int y){
 	// Traitement à effectuer lorsque la touche est enfoncée
 	switch(key)
 	{
@@ -140,6 +143,15 @@ void myKeyboard(int key, int x, int y){
 
 	glutPostRedisplay(); // On demande un rafraîchissement de l'affichage
 
+}
+
+void mouseEvent(int button, int state, int x, int y)
+{
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+    	if(ball.vX <= 0 && ball.vY <= 0){
+    		ball.vX = 0.2;
+    		ball.vX = 0.2;
+    	}
 }
 
 void display(void)
@@ -176,8 +188,9 @@ int main(int argc, char **argv)
 
 	// Définition de la fonction de gestion des événements du clavier
 	//glutKeyboardFunc(myKeyboard);
-	glutSpecialFunc(myKeyboard);
 
+	glutSpecialFunc(keyPress);
+	glutMouseFunc(mouseEvent);
 	glutDisplayFunc(display);
 
 	init();
