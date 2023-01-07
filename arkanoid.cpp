@@ -6,29 +6,28 @@
 
 using namespace std;
 
-
 struct Ball{
-	// Coordonnées du centre de la balle
+	//coordinates of the ball
 	float x = 380, y = 420;
-	// Dimensions de la balle
+	//dimensions of the ball
 	float width = 10, height = 8;
-	//Vitesse de la balle
+	//speed of the ball
 	float vX=0.03, vY = 0.06;
 };
 
 struct Paddle{
-	// Coordonnées du centre de la plateforme
+	//coordinates of the platform
 	float x = 380, y = 450;
-	// Dimensions de la plateforme
+	//dimensions of the platform
 	float width = 100, height = 5;
 };
 
 struct Bricks{
-	// Coordonnées de la brique
+	//coordinates of the bricks
 	float x,y;
-	// Dimensions de la brique
+	//dimensions of the bricks
 	float width=45,height=10;
-	// état de la brique
+	//state of the bricks
 	bool isDestroyed = false;
 };
 
@@ -40,10 +39,10 @@ int mouseX, mouseY;
 bool win=false,lost=false,start=false;
 
 void drawBall(){
-	// Appliquer la couleur de la balle (jaune)
+	//apply the color of the ball (yellow)
 	glColor3f(255, 255, 0);
 
-	// Créer la balle quadrilatère
+	//draw the ball as a rectangle
 	glBegin(GL_QUADS);
 	glVertex2f(ball.x - ball.width / 2, ball.y - ball.height / 2);
 	glVertex2f(ball.x + ball.width / 2, ball.y - ball.height / 2);
@@ -54,12 +53,11 @@ void drawBall(){
 
 void drawPaddle(){
 
-	// Appliquer la couleur de la plateforme (bleu)
+	//apply the color of the platform (blue)
 	glColor3f(0, 0, 255);
 
-	// Créer la plateforme
+	//draw the platform
 	glBegin(GL_QUADS);
-
 	glVertex2f(Paddle.x - Paddle.width / 2, Paddle.y - Paddle.height / 2);
 	glVertex2f(Paddle.x + Paddle.width / 2, Paddle.y - Paddle.height / 2);
 	glVertex2f(Paddle.x + Paddle.width / 2, Paddle.y + Paddle.height / 2);
@@ -69,8 +67,8 @@ void drawPaddle(){
 
 void drawBrick(){
 
+	//coordinates of the bricks
 	float posX=100, posY=80;
-	// Coordonnées du centre de la brique
 	for(int i=0; i< nBricks; i++){
 		bricks[i].x = posX;
 		bricks[i].y = posY;
@@ -82,7 +80,7 @@ void drawBrick(){
 		}
 	}
 
-	// Appliquer la couleur de la brique (vert)
+	//apply the color of the platform (green)
 	glColor3f(0, 128, 0);
 	glBegin(GL_QUADS);
 
@@ -100,28 +98,29 @@ void drawBrick(){
 }
 
 bool checkCollisionBrick() {
-  // Parcourir chaque brique
+  //browse each brick
   for (int i = 0; i < nBricks; i++) {
-    // Vérifier l'état de la brique, si elle est détruite, on passe à la prochaine itération
+	  	//check the state of the brick, if it is destroyed, go to the next iteration
 	  	if(bricks[i].isDestroyed) continue;
-	    // Vérifier si la balle entre en collision avec la brique à la position i
+	  	//check if the ball collides with the brick at position i
 
+	  	//calculate the coordinates of the corners of the ball
 	  	float bx1 = ball.x - ball.width / 2;
 	  	float bx2 = ball.x + ball.width / 2;
 	    float by1 = ball.y - ball.height / 2;
 	    float by2 = ball.y + ball.height / 2;
 
-	    // Calculer des coordonnées des coins de la brique à la position 1
+	    //calculate the coordinates of the corners of the brick at position 1
 	    float brx1 = bricks[i].x - bricks[i].width / 2;
 	    float brx2 = bricks[i].x + bricks[i].width / 2;
 	    float bry1 = bricks[i].y - bricks[i].height / 2;
 	    float bry2 = bricks[i].y + bricks[i].height / 2;
 
-	    // Vérifier s'il y a eu une collision
+	    //check if there has been a collision
 	    if (bx1 > brx2 || bx2 < brx1 || by1 > bry2 || by2 < bry1)
-	    continue; // Pas de collision, on passe à la prochaine itération
+	    continue; //no collision, so we go to the next iteration
 
-	    // Il y a eu une collision, donc true
+	    // There was a collision, so true and and we change the state of the brick
 	    bricks[i].isDestroyed = true;
 	    return true;
     }
@@ -130,23 +129,23 @@ bool checkCollisionBrick() {
 
 
 bool checkCollisionPaddle() {
-	 // Calculer les coordonnées des coins de la balle
+	  //calculate the coordinates of the corners of the ball
 	  float bx1 = ball.x - ball.width / 2;
 	  float bx2 = ball.x + ball.width / 2;
 	  float by1 = ball.y - ball.height / 2;
 	  float by2 = ball.y + ball.height / 2;
 
-	  // Calculer des coordonnées des coins de la plateforme
+	  //calculate the coordinates of the corners of the platform
 	  float rx1 = Paddle.x - Paddle.width / 2;
 	  float rx2 = Paddle.x + Paddle.width / 2;
 	  float ry1 = Paddle.y - Paddle.height / 2;
 	  float ry2 = Paddle.y + Paddle.height / 2;
 
-	  // Vérifier s'il y a eu une collision
+	  //check if there has been a collision
 	  if (bx1 > rx2 || bx2 < rx1 || by1 > ry2 || by2 < ry1) {
-	    return false; // Pas de collision
+	    return false; //no collision
 	  }
-	  return true; // Collision détectée
+	  return true; //collision detected
 
 }
 
@@ -169,7 +168,7 @@ void onWinGame(){
 	Paddle.y = 450;
 
 	float posX=100, posY=80;
-	// Coordonnées du centre de la brique
+	//coordinates of the brick
 	for(int i=0; i< nBricks; i++){
 		bricks[i].x = posX;
 		bricks[i].y = posY;
@@ -196,7 +195,7 @@ void endGame(){
 	score=0;
 	roundCurrent=1;
 	float posX=100, posY=80;
-	// Coordonnées du centre de la brique
+	//coordinates of the bricks
 	for(int i=0; i< nBricks; i++){
 		bricks[i].x = posX;
 		bricks[i].y = posY;
@@ -214,12 +213,12 @@ void onBallMove(){
 
 	ball.x += ball.vX;
 
-	//Vérifier s'il y a une collision entre la plateforme et la balle
+	//check if there is a collision between the platform and the ball
 	if(checkCollisionPaddle()){
 		ball.vY = -ball.vY;
 	}
 
-	//Vérifier s'il y a une collision entre une brique  et la balle
+	//check if there is a collision between a brick and the ball
 	if(checkCollisionBrick()){
 		ball.vX = -ball.vX;
 		score+= 5;
@@ -231,21 +230,19 @@ void onBallMove(){
 		score+= 5;
 	}
 
-	// Gestion des rebonds de la balle sur les bords de l'écran
+	// Management of the ball's bounces on the edges of the screen
 	if(ball.x-ball.width < 0 || ball.x+ball.width > 775)
 		ball.vX = -ball.vX;
 
 	if(ball.y < 0)
 		ball.vY = -ball.vY;
 
-	if(ball.y + ball.width > 500){
-
+	if(ball.y + ball.height > 480){
 	//GAMEOVER
-
 	endGame();
 
 	}
-	//Vérifier s'il y a une une victoire
+	//check if there is a win
 	if(isWin())
 		onWinGame();
     glutSwapBuffers();
@@ -269,13 +266,13 @@ void keyboard(unsigned char key, int x, int y) {
 
 void onMouseMove(int x, int y)
 {
-    //calculer le déplacement de la souris par rapport à la position précédente
+	//calculate mouse movement from previous position
     int dx = x - mouseX;
 
-    //nouvelle position de la souris
+    //new mouse position
     mouseX = x;
 
-    //appliquer le déplacement à la plateforme
+    //apply the trip to the platform
     Paddle.x += dx;
     if(Paddle.x+Paddle.width > 830) Paddle.x  = 830 - Paddle.width;
     else if(Paddle.x-Paddle.width < -50) Paddle.x = -50 + Paddle.width;
@@ -285,20 +282,20 @@ void onMouseClick(int button, int state, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
-        // Enregistrer la position de la souris
+    	//save the mouse position
         mouseX = x;
         mouseY = y;
     }
 }
 void showText(){
 
-	// définir la couleur du texte
+	//set the text color (white)
 	glColor3f(255, 255, 255);
 
-	//définir la position du texte
+	//set text position
     glRasterPos2f(75, 30);
 
-    // afficher le texte
+    //display the text
     char scoreText[32];
     sprintf(scoreText, "Score: %d", score);
 	int len = strlen(scoreText);
@@ -307,13 +304,13 @@ void showText(){
 	    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, scoreText[i]);
 	}
 
-	// définir la couleur du texte
-	glColor3f(1.0, 1.0, 1.0);
+	//set the text color (white)
+	glColor3f(255, 255, 255);
 
-	//définir la position du texte
+	//set text position
 	glRasterPos2f(580, 30);
 
-	// afficher le texte
+	//display the text
 	char roundCurrentText[32];
 	sprintf(roundCurrentText, "Round: %d",roundCurrent);
 	int len1 = strlen(roundCurrentText);
@@ -325,13 +322,13 @@ void showText(){
 
 
 void showTextWinLost(const char*text, int pos){
-	// définir la couleur du texte
+	//set the text color (white)
 	glColor3f(255, 255, 255);
 
-	 // définir la position du texte
+	//set text position
 	 glRasterPos2f(pos, 350);
 
-	 // afficher le texte
+	 //display the text
 	 int len = strlen(text);
 	 for (int i = 0; i < len; i++)
 	 {
@@ -364,41 +361,41 @@ void display(void)
 void init()
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0); // black backgroundCurrent
-	glMatrixMode(GL_PROJECTION); // setup viewing projection
-	glLoadIdentity(); // start with identity matrix
-	glOrtho(0.0, 780, 500, 0.0, -1.0, 1.0); // définissez les propriétés de vue (vue en 2D)
+	glMatrixMode(GL_PROJECTION); //setup viewing projection
+	glLoadIdentity(); //start with identity matrix
+	glOrtho(0.0, 780, 500, 0.0, -1.0, 1.0); //define the view properties (2D view)
 }
 
 
 int main(int argc, char **argv)
 {
-	// Initialisation de FreeGLUT
+	//initialize FreeGLUT
 	glutInit(&argc, argv);
 
-	// définir le mode d'affichage
+	//set the display mode
 	glutInitDisplayMode ( GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
 
-	// définir la position de la fenêtre
+	//set the position of the window
 	glutInitWindowPosition(200,50);
 
-	// définir la taille de la fenêtre
+	//set the size of the window
 	glutInitWindowSize(800,600);
 
-	//création de la fenêtre
+	//creation of the window
 	glutCreateWindow ("ARKANOID");
 
-	//définition des fonctions pour le mouvement de la souris et les clics de souris
+	//definition of functions for mouse
 	glutMotionFunc(onMouseMove);
 	glutMouseFunc(onMouseClick);
 
-	//définition de la fonction de gestion des événements du clavier
+	//definition of the keyboard event management function
 	glutKeyboardFunc(keyboard);
 
+	//definition of the display function
 	glutDisplayFunc(display);
     init();
 
-	glutMainLoop(); // Lancement de la boucle d'événements
-
+	glutMainLoop();//launching the event loop
 	return 0;
 
 }
