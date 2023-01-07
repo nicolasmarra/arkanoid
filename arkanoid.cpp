@@ -33,11 +33,11 @@ struct Bricks{
 };
 
 Bricks bricks[nBricks];
-
 Ball ball;
 Paddle Paddle;
-
-int score=0,round=1;
+int score=0,roundCurrent=1;
+int mouseX, mouseY;
+bool win=false,lost=false,start=false;
 
 void drawBall(){
 	// Appliquer la couleur de la balle (jaune)
@@ -97,50 +97,7 @@ void drawBrick(){
 	}
 
 	glEnd();
-
 }
-
-// Fonction de gestion des événements du clavier
-void keyPress(int key, int x, int y){
-	// Traitement à effectuer lorsque la touche est enfoncée
-	switch(key)
-	{
-			case GLUT_KEY_RIGHT:
-		        Paddle.x += 15;
-		        if(Paddle.x+Paddle.width > 830) Paddle.x  = 830 - Paddle.width;
-		        break;
-			case GLUT_KEY_LEFT:
-				Paddle.x -= 15;
-	            if(Paddle.x-Paddle.width < -50) Paddle.x = -50 + Paddle.width;
-	            break;
-	        default:
-	        	break;
-	}
-
-	glutPostRedisplay(); // On demande un rafraîchissement de l'affichage
-
-}
-
-/*
-bool checkCollisionBrick() {
-  // Parcourir chaque brique
-  for (int i = 0; i < nBricks; i++) {
-    // Vérifier l'état de la brique, si elle est détruite, on passe à la prochaine itération
-	  	if(bricks[i].isDestroyed) continue;
-	    // Vérifier si la balle entre en collision avec la brique à la position i
-	  	if (ball.x + ball.width > bricks[i].x &&
-        ball.x < bricks[i].x + bricks[i].width &&
-        ball.y + ball.width > bricks[i].y &&
-        ball.y < bricks[i].y + bricks[i].height) {
-	  	// Il y a collision, donc la brique a été détruite et retourne true
-	  		bricks[i].isDestroyed = true;
-	  		return true;
-    }
-  }
-
-  // Il n'y a pas eu de collision, donc false
-  return false;
-}*/
 
 bool checkCollisionBrick() {
   // Parcourir chaque brique
@@ -199,7 +156,6 @@ bool isWin(){
 		if(!bricks[i].isDestroyed)
 			return false;
 	}
-
 	return true;
 }
 
@@ -224,7 +180,8 @@ void onWinGame(){
 			posY+= 28;
 			}
 		}
-	round++;
+	roundCurrent++;
+	win=true;
 }
 
 void endGame(){
@@ -237,7 +194,7 @@ void endGame(){
 	Paddle.y = 450;
 
 	score=0;
-	round=1;
+	roundCurrent=1;
 	float posX=100, posY=80;
 	// Coordonnées du centre de la brique
 	for(int i=0; i< nBricks; i++){
@@ -250,7 +207,7 @@ void endGame(){
 			posY+= 28;
 		}
 	}
-
+	lost=true;
 }
 
 void onBallMove(){
@@ -295,22 +252,48 @@ void onBallMove(){
 	glutPostRedisplay();
 }
 
-void mouseEvent(int button, int state, int x, int y)
+void keyboard(unsigned char key, int x, int y) {
+  if (key == ' ') {
+	  if(ball.vX <= 0 && ball.vY <= 0)
+	  {
+		  ball.vX = 0.03*roundCurrent;
+	      ball.vY = 0.06*roundCurrent;
+	  }
+	  start=true;
+	  win=false;
+	  lost=false;
+	  glutIdleFunc(onBallMove);
+
+  }
+}
+
+void onMouseMove(int x, int y)
+{
+    //calculer le déplacement de la souris par rapport à la position précédente
+    int dx = x - mouseX;
+
+    //nouvelle position de la souris
+    mouseX = x;
+
+    //appliquer le déplacement à la plateforme
+    Paddle.x += dx;
+    if(Paddle.x+Paddle.width > 830) Paddle.x  = 830 - Paddle.width;
+    else if(Paddle.x-Paddle.width < -50) Paddle.x = -50 + Paddle.width;
+}
+
+void onMouseClick(int button, int state, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
-    	if(ball.vX <= 0 && ball.vY <= 0){
-    		ball.vX = 0.03*round;
-    		ball.vY = 0.06*round;
-    	}
-        glutIdleFunc(onBallMove);
+        // Enregistrer la position de la souris
+        mouseX = x;
+        mouseY = y;
     }
 }
-
 void showText(){
 
 	// définir la couleur du texte
-	glColor3f(1.0, 1.0, 1.0);
+	glColor3f(255, 255, 255);
 
 	//définir la position du texte
     glRasterPos2f(75, 30);
@@ -331,16 +314,31 @@ void showText(){
 	glRasterPos2f(580, 30);
 
 	// afficher le texte
-	char roundText[32];
-	sprintf(roundText, "Round: %d",round);
-	int len1 = strlen(roundText);
+	char roundCurrentText[32];
+	sprintf(roundCurrentText, "Round: %d",roundCurrent);
+	int len1 = strlen(roundCurrentText);
 	for (int i = 0; i < len1; i++)
 	{
-		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, roundText[i]);
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, roundCurrentText[i]);
 	}
 }
 
 
+void showTextWinLost(const char*text, int pos){
+	// définir la couleur du texte
+	glColor3f(255, 255, 255);
+
+	 // définir la position du texte
+	 glRasterPos2f(pos, 350);
+
+	 // afficher le texte
+	 int len = strlen(text);
+	 for (int i = 0; i < len; i++)
+	 {
+	    glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, text[i]);
+	 }
+
+}
 
 void display(void)
 {
@@ -350,12 +348,22 @@ void display(void)
     drawPaddle();
     drawBrick();
     showText();
+
+    if(!start)
+    	showTextWinLost("Appuyez sur la barre d'espace pour commencer!",180);
+
+    if(win)
+    	showTextWinLost("Bien joué! Vous avez gagné,Appuyez sur la barre d'espace pour continuer!",40);
+    else if(lost)
+    	showTextWinLost("Vous avez perdu!Appuyez sur la barre d'espace pour recommencer!",80);
+
+
     glutSwapBuffers();
 }
 
 void init()
 {
-	glClearColor(0.0, 0.0, 0.0, 0.0); // black background
+	glClearColor(0.0, 0.0, 0.0, 0.0); // black backgroundCurrent
 	glMatrixMode(GL_PROJECTION); // setup viewing projection
 	glLoadIdentity(); // start with identity matrix
 	glOrtho(0.0, 780, 500, 0.0, -1.0, 1.0); // définissez les propriétés de vue (vue en 2D)
@@ -379,13 +387,14 @@ int main(int argc, char **argv)
 	//création de la fenêtre
 	glutCreateWindow ("ARKANOID");
 
-	// Définition de la fonction de gestion des événements du clavier
-	//glutKeyboardFunc(myKeyboard);
+	//définition des fonctions pour le mouvement de la souris et les clics de souris
+	glutMotionFunc(onMouseMove);
+	glutMouseFunc(onMouseClick);
 
-	glutSpecialFunc(keyPress);
-	glutMouseFunc(mouseEvent);
+	//définition de la fonction de gestion des événements du clavier
+	glutKeyboardFunc(keyboard);
+
 	glutDisplayFunc(display);
-
     init();
 
 	glutMainLoop(); // Lancement de la boucle d'événements
