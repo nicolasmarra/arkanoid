@@ -10,39 +10,40 @@ using namespace std;
 struct Ball{
 	// Coordonnées du centre de la balle
 	float x = 380, y = 420;
-
 	// Dimensions de la balle
 	float width = 10, height = 8;
-
 	//Vitesse de la balle
-	float vX=0.01, vY = 0.03;
-
+	float vX=0.03, vY = 0.06;
 };
 
-struct Rect{
-	// Coordonnées du centre du rectangle
+struct Paddle{
+	// Coordonnées du centre de la plateforme
 	float x = 380, y = 450;
-	// Dimensions du rectangle
+	// Dimensions de la plateforme
 	float width = 100, height = 5;
-
 };
 
 struct Bricks{
+	// Coordonnées de la brique
 	float x,y;
+	// Dimensions de la brique
 	float width=45,height=10;
+	// état de la brique
 	bool isDestroyed = false;
 };
 
 Bricks bricks[nBricks];
 
 Ball ball;
-Rect rect;
+Paddle Paddle;
+
+int score=0,round=1;
 
 void drawBall(){
-	// Définir la couleur de la balle (jaune)
+	// Appliquer la couleur de la balle (jaune)
 	glColor3f(255, 255, 0);
 
-	// Dessiner la balle quadrilatère
+	// Créer la balle quadrilatère
 	glBegin(GL_QUADS);
 	glVertex2f(ball.x - ball.width / 2, ball.y - ball.height / 2);
 	glVertex2f(ball.x + ball.width / 2, ball.y - ball.height / 2);
@@ -51,18 +52,18 @@ void drawBall(){
 	glEnd();
 }
 
-void drawRect(){
+void drawPaddle(){
 
-	// Définir la couleur du rectangle (bleu)
+	// Appliquer la couleur de la plateforme (bleu)
 	glColor3f(0, 0, 255);
 
-	// Dessiner le rectangle
+	// Créer la plateforme
 	glBegin(GL_QUADS);
 
-	glVertex2f(rect.x - rect.width / 2, rect.y - rect.height / 2);
-	glVertex2f(rect.x + rect.width / 2, rect.y - rect.height / 2);
-	glVertex2f(rect.x + rect.width / 2, rect.y + rect.height / 2);
-	glVertex2f(rect.x - rect.width / 2, rect.y + rect.height / 2);
+	glVertex2f(Paddle.x - Paddle.width / 2, Paddle.y - Paddle.height / 2);
+	glVertex2f(Paddle.x + Paddle.width / 2, Paddle.y - Paddle.height / 2);
+	glVertex2f(Paddle.x + Paddle.width / 2, Paddle.y + Paddle.height / 2);
+	glVertex2f(Paddle.x - Paddle.width / 2, Paddle.y + Paddle.height / 2);
 	glEnd();
 }
 
@@ -81,7 +82,7 @@ void drawBrick(){
 		}
 	}
 
-	// Définir la couleur de la balle (jaune)
+	// Appliquer la couleur de la brique (vert)
 	glColor3f(0, 128, 0);
 	glBegin(GL_QUADS);
 
@@ -92,9 +93,7 @@ void drawBrick(){
 			glVertex2f(bricks[i].x + bricks[i].width/2, bricks[i].y - bricks[i].height/2);
 			glVertex2f(bricks[i].x + bricks[i].width/2, bricks[i].y + bricks[i].height/2);
 			glVertex2f(bricks[i].x - bricks[i].width/2, bricks[i].y + bricks[i].height/2);
-
 		}
-
 	}
 
 	glEnd();
@@ -107,12 +106,12 @@ void keyPress(int key, int x, int y){
 	switch(key)
 	{
 			case GLUT_KEY_RIGHT:
-		        rect.x += 15;
-		        if(rect.x+rect.width > 810) rect.x  = 810 - rect.width;
+		        Paddle.x += 15;
+		        if(Paddle.x+Paddle.width > 830) Paddle.x  = 830 - Paddle.width;
 		        break;
 			case GLUT_KEY_LEFT:
-				rect.x -= 15;
-	            if(rect.x-rect.width < -50) rect.x = -50 + rect.width;
+				Paddle.x -= 15;
+	            if(Paddle.x-Paddle.width < -50) Paddle.x = -50 + Paddle.width;
 	            break;
 	        default:
 	        	break;
@@ -126,47 +125,78 @@ void keyPress(int key, int x, int y){
 bool checkCollisionBrick() {
   // Parcourir chaque brique
   for (int i = 0; i < nBricks; i++) {
-    // Vérifier si la balle entre en collision avec la brique actuelle
-
+    // Vérifier l'état de la brique, si elle est détruite, on passe à la prochaine itération
 	  	if(bricks[i].isDestroyed) continue;
-
-
+	    // Vérifier si la balle entre en collision avec la brique à la position i
 	  	if (ball.x + ball.width > bricks[i].x &&
         ball.x < bricks[i].x + bricks[i].width &&
         ball.y + ball.width > bricks[i].y &&
         ball.y < bricks[i].y + bricks[i].height) {
-      // Il y a collision, retourner vrai
-
-    	bricks[i].isDestroyed = true;
-    	return true;
+	  	// Il y a collision, donc la brique a été détruite et retourne true
+	  		bricks[i].isDestroyed = true;
+	  		return true;
     }
   }
 
-  // Aucune collision n'a été détectée, retourner false
+  // Il n'y a pas eu de collision, donc false
   return false;
 }
 
 
 
-bool checkCollisionRect() {
-	 // Calcul des coordonnées des coins de la balle
+bool checkCollisionPaddle() {
+	 // Calculer les coordonnées des coins de la balle
 	  float bx1 = ball.x - ball.width / 2;
 	  float bx2 = ball.x + ball.width / 2;
 	  float by1 = ball.y - ball.height / 2;
 	  float by2 = ball.y + ball.height / 2;
 
-	  // Calcul des coordonnées des coins du rectangle
-	  float rx1 = rect.x - rect.width / 2;
-	  float rx2 = rect.x + rect.width / 2;
-	  float ry1 = rect.y - rect.height / 2;
-	  float ry2 = rect.y + rect.height / 2;
+	  // Calculer des coordonnées des coins de la plateforme
+	  float rx1 = Paddle.x - Paddle.width / 2;
+	  float rx2 = Paddle.x + Paddle.width / 2;
+	  float ry1 = Paddle.y - Paddle.height / 2;
+	  float ry2 = Paddle.y + Paddle.height / 2;
 
-	  // Vérification de la collision
+	  // Vérifier s'il y a eu une collision
 	  if (bx1 > rx2 || bx2 < rx1 || by1 > ry2 || by2 < ry1) {
 	    return false; // Pas de collision
 	  }
 	  return true; // Collision détectée
 
+}
+
+
+bool isWin(){
+	for(int i=0; i< nBricks; i++){
+		if(!bricks[i].isDestroyed)
+			return false;
+	}
+
+	return true;
+}
+
+void onWinGame(){
+	ball.x = 380;
+	ball.y = 420;
+	ball.vX = 0;
+	ball.vY = 0;
+
+	Paddle.x = 380;
+	Paddle.y = 450;
+
+	float posX=100, posY=80;
+	// Coordonnées du centre de la brique
+	for(int i=0; i< nBricks; i++){
+		bricks[i].x = posX;
+		bricks[i].y = posY;
+		bricks[i].isDestroyed = false;
+		posX+=50;
+		if(posX > 650){
+			posX = 100;
+			posY+= 28;
+			}
+		}
+	round++;
 }
 
 void endGame(){
@@ -175,9 +205,11 @@ void endGame(){
 	ball.vX = 0;
 	ball.vY = 0;
 
-	rect.x = 380;
-	rect.y = 450;
+	Paddle.x = 380;
+	Paddle.y = 450;
 
+	score=0;
+	round=1;
 	float posX=100, posY=80;
 	// Coordonnées du centre de la brique
 	for(int i=0; i< nBricks; i++){
@@ -192,38 +224,40 @@ void endGame(){
 	}
 }
 
-void moveBall(){
+void onBallMove(){
 
 	ball.x += ball.vX;
 
+	//Vérifier s'il y a une collision entre la plateforme et la balle
+	if(checkCollisionPaddle())
+			ball.vY = -ball.vY;
 
-	if(checkCollisionBrick()){
+
+	//Vérifier s'il y a une collision entre une brique  et la balle
+	if(checkCollisionBrick())
 		ball.vX = -ball.vX;
-	}
 
 	ball.y -= ball.vY;
-	if(checkCollisionBrick()){
-
+	if(checkCollisionBrick())
 		ball.vY = -ball.vY;
 
-	}
-	// Gérer les rebonds de la balle sur les bords de l'écran
-	if(ball.x-ball.width < -50 || ball.x+ball.width > 750)
+	// Gestion des rebonds de la balle sur les bords de l'écran
+	if(ball.x-ball.width < 0 || ball.x+ball.width > 775)
 		ball.vX = -ball.vX;
 
 	if(ball.y < 0)
 		ball.vY = -ball.vY;
 
-	if(checkCollisionRect())
-		ball.vY = -ball.vY;
-
-	if(ball.y + ball.width > 810){
+	if(ball.y + ball.width > 500){
 
 	//GAMEOVER
 
 	endGame();
 
 	}
+	//Vérifier s'il y a une une victoire
+	if(isWin())
+		onWinGame();
     glutSwapBuffers();
 	glutPostRedisplay();
 }
@@ -233,12 +267,10 @@ void mouseEvent(int button, int state, int x, int y)
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
     {
     	if(ball.vX <= 0 && ball.vY <= 0){
-    		ball.vX = 0.01;
-    		ball.vY = 0.03;
-
+    		ball.vX = 0.03*round;
+    		ball.vY = 0.06*round;
     	}
-        glutIdleFunc(moveBall);
-
+        glutIdleFunc(onBallMove);
     }
 }
 
@@ -248,7 +280,7 @@ void display(void)
     glColor3f (0.0, 0.0, 0.0);
 
     drawBall();
-    drawRect();
+    drawPaddle();
     drawBrick();
     glutSwapBuffers();
 }
@@ -258,9 +290,7 @@ void init()
 	glClearColor(0.0, 0.0, 0.0, 0.0); // black background
 	glMatrixMode(GL_PROJECTION); // setup viewing projection
 	glLoadIdentity(); // start with identity matrix
-	//glOrtho(0, 1000, 1000, 0, -1, 1); // définissez les propriétés de vue (vue en 2D)
-
-    gluOrtho2D(0.0, 760.0, 480.0, 0.0);
+	glOrtho(0.0, 780, 500, 0.0, -1.0, 1.0); // définissez les propriétés de vue (vue en 2D)
 }
 
 int main(int argc, char **argv)
