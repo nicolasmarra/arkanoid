@@ -11,6 +11,6 @@ Lorsque l'on gagne, on avance au niveau (tour) supérieur, par conséquent la vi
 
 <ul>
   <li>Langage : C++</li>
-  <li>Bibliothèque graphique : OpenGL</li>
-  <li>Bibliothèque évènements : FreeGlut</li>
+  <li>Bibliothèque graphique : <a href="https://www.opengl.org/" target="_blank">OpenGL</a></li>
+  <li>Bibliothèque évènements : <a href="https://freeglut.sourceforge.net/docs/api.php" target="_blank">FreeGlut</a></li>
 </ul>
