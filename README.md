@@ -8,6 +8,8 @@ On perd si on rate la balle avec la plateforme et que la balle sort du terrain d
 
 # Tecnologies
 
-Langage : C++
-Bibliothèque graphique : OpenGL
-Bibliothèque évènements : FreeGlut
+<ul>
+  <li>Langage : C++</li>
+  <li>Bibliothèque graphique : OpenGL</li>
+  <li>Bibliothèque évènements : FreeGlut</li>
+</ul>
